@@ -167,7 +167,7 @@
 
 ### 비기능 요구사항에 대한 검증
 
-![image](https://user-images.githubusercontent.com/49930207/131421776-9ac5903a-14ae-4ce3-8d75-57b369741833.png)
+![image](https://user-images.githubusercontent.com/49930207/131438968-8c4913fa-1bf3-4461-8586-234cfa657c2f.png)
 
 트랜잭션
 강의 결제가 완료 되어야만 수강 신청 완료 할 수 있음 Sync 호출
