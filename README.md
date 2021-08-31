@@ -160,7 +160,7 @@
 
 ### 모델 완료
 
-![모델완료](https://user-images.githubusercontent.com/49930207/131273507-b18c5892-c042-4d35-8f54-368f79a8eb6b.png)
+![image](https://user-images.githubusercontent.com/49930207/131421339-00c23907-fdcf-4045-aa7c-08bb8930655f.png)
 
     - 마이크로서비스별 Aggregate , Evnecnt, Policy, Command Attribute 정의
     - Naming변경
@@ -168,7 +168,7 @@
 
 ### 비기능 요구사항에 대한 검증
 
-![image](https://user-images.githubusercontent.com/80744192/120918148-d6e7db00-c6ed-11eb-9bf4-1cbfa6873661.png)
+![image](https://user-images.githubusercontent.com/49930207/131421776-9ac5903a-14ae-4ce3-8d75-57b369741833.png)
 
 트랜잭션
 강의 결제가 완료 되어야만 수강 신청 완료 할 수 있음 Sync 호출
@@ -182,7 +182,7 @@
   
 2. 성능 Async. 호출 (Event Driven 방식)
   - 결제 완료시 배송처리: pay에서 course 마이크로서비스로 주문요청이 전달되는 과정에 있어서 Store 마이크로 서비스가 별도의 배포주기를 가지기 때문에 Eventual Consistency 방식으로 트랜잭션 처리함.
- - 나머지 모든 inter-microservice 트랜잭션: 주문상태, 배달상태 등 모든 이벤트에 대go 데이터 일관성의 시점이 크리티컬하지 않은 모든 경우가 대부분이라 판단, Eventual Consistency 를 기본으로 채택함.
+ - 나머지 모든 inter-microservice 트랜잭션: 주문상태, 배달상태 등 모든 이벤트에 대해 데이터 일관성의 시점이 크리티컬하지 않은 모든 경우가 대부분이라 판단, Eventual Consistency 를 기본으로 채택함.
 3. 성능 Mypage (CQRS)
   - 학생용 마이페이지 및 강사용 마이페이지를 각각 구성하여 언제든 상태 정보를 확인 할 수 있음 CQRS
 
