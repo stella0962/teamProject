@@ -123,9 +123,9 @@
 
     - 수강신청, 강의등록, 결제내역, 배송내역 업무영역 단위로 묶음
 
-### Boundary Context로 묶기
+### Bounded Context로 묶기
 
-![Boundary Context](https://user-images.githubusercontent.com/49930207/131061428-9b1f1367-97bf-448c-b3e7-70cdcdc442af.png)
+![Bounded Context](https://user-images.githubusercontent.com/49930207/131061428-9b1f1367-97bf-448c-b3e7-70cdcdc442af.png)
 
     - 도메인 서열 분리 
         - Core Domain:  class, course : 없어서는 안될 핵심 서비스이며, 연견 Up-time SLA 수준을 99.999% 목표, 배포주기는 class 의 경우 1주일 1회 미만, course 의 경우 1개월 1회 미만
