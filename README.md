@@ -211,14 +211,10 @@ mvn spring-boot:run
 cd pay
 mvn spring-boot:run  
 
-cd alert
-python alert_consumer.py
-python alert_web.py 
-
 cd gateway
 mvn spring-boot:run
 
-cd schedule
+cd delivery
 mvn spring-boot:run
 
 cd mypage
@@ -478,17 +474,29 @@ http GET http://ad45ebba654ca4d4993d71580ed82c7f-474668662.eu-central-1.elb.amaz
 
 ## 폴리글랏 퍼시스턴스
 
-결제 서비스 (pay) 및 강사용 스케쥴 서비스 (schedule) 는 서비스 특성상 Money와 관련된 결제 서비스로 H2 DB 보다는 더욱 안정적인 mysql 을 사용하기로 하였다. 
-Spring Cloud JPA를 사용하여 개발하였기 때문에 소스의 변경 부분은 전혀 없으며, 단지 데이터베이스 제품의 설정 (application.yml) 만으로 mysql 에 부착시켰다
+Delivery 서비스 (schedule) 는 mysql 을 사용하여 구현하였다. 
+Spring Cloud JPA를 사용하여 개발하였기 때문에 소스의 변경 부분은 전혀 없으며, 단지 데이터베이스 제품의 설정 (pom.xml, application.yml) 만으로 mysql 에 부착시켰다
 
 ```
-# application.yml (강사용 스케쥴)
+# pom.yml (Delivery)
+
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.25</version>
+		</dependency>
+		<dependency>
+
+```
+
+```
+# application.yml (Delivery)
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://mysql.mysql.svc.cluster.local:3306/scheduledb?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/class?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
     username: root
-    password: di3UVoNjbc
+    password: Sktngm12@@
   jpa:
     database: mysql
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
@@ -540,7 +548,7 @@ mysql> show tables;
 +-----------------------+
 | Tables_in_scheduledb  |
 +-----------------------+
-| course_schedule_table |
+| delivery_table        |
 | hibernate_sequence    |
 +-----------------------+
 2 rows in set (0.00 sec)
@@ -556,48 +564,6 @@ mysql> select * from course_schedule_table;
 
 mysql> 
 ```
-
-
-## 폴리글랏 프로그래밍
-
-SMS 서비스(alert)는 시나리오 상 모든 상태 변경이 발생 시 고객에게 SMS 메시지 보내는 기능의 구현 파트는 해당 팀이 python 을 이용하여 구현하기로 하였다. 
-해당 파이썬 구현체는 각 이벤트를 수신하여 처리하는 Kafka consumer 로 구현되었고 코드는 다음과 같다
-
-```
-from kafka import KafkaConsumer
-from logging.config import dictConfig
-import logging
-import os
-
-kafka_url = os.getenv('KAFKA_URL')
-log_file = os.getenv('LOG_FILE')
-
-...
-
-logging.debug("KAFKA URL : %s" % (kafka_url))
-logging.debug("LOG_FILE : %s" % (log_file))
-
-consumer = KafkaConsumer('lecture', bootstrap_servers=[
-                         kafka_url], auto_offset_reset='earliest', enable_auto_commit=True, group_id='alert')
-
-for message in consumer:
-    logging.debug("Topic: %s, Partition: %d, Offset: %d, Key: %s, Value: %s" % (
-        message.topic, message.partition, message.offset, message.key, message.value))
-
-# SMS 발송 API
-
-```
-
-- 파이선 애플리케이션을 컴파일하고 실행하기 위한 도커파일은 아래와 같다 
-
-```
-FROM python:3.6.13-slim
-RUN pip install kafka-python
-WORKDIR /app
-COPY alert_consumer.py alert_consumer.py
-ENTRYPOINT ["python","-u","alert_consumer.py"]
-```
-
 
 ## 동기식 호출 과 Fallback 처리
 
