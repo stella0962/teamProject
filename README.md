@@ -208,7 +208,7 @@ mvn spring-boot:run
 cd class
 mvn spring-boot:run 
 
-cd pay
+cd payment
 mvn spring-boot:run  
 
 cd gateway
@@ -262,82 +262,42 @@ horizontalpodautoscaler.autoscaling/pay     Deployment/pay     0%/30%    1      
 ## DDD 의 적용
 
 - 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다: 
- (예시는 schedule 마이크로 서비스). 이때 가능한 중학교 수준의 영어를 사용하려고 노력했다. 
+ (예시는 payment 마이크로 서비스). 이때 가능한 중학교 수준의 영어를 사용하려고 노력했다. 
 
 ```
-package lecture;
+package team;
 
 import javax.persistence.*;
 import org.springframework.beans.BeanUtils;
 
-import lecture.external.Course;
-import lecture.external.CourseService;
-
 @Entity
-@Table(name = "CourseSchedule_table")
-public class CourseSchedule {
+@Table(name = "Payment_table")
+public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private Long courseId;
-    private String courseName;
-    private String teacher;
-    private Integer studentCount;
-    private Boolean openYn;
-
-    @Transient
-    private Boolean preOpenYn;
-
-    @PostLoad
-    public void onPostLoad() {
-        this.setPreOpenYn(this.getOpenYn());
-    }
+    private String applyId;
+    private String payMethod;
+    private String payAccount;
+    private String payStaus;
+    private String addr;
+    private String telephoneInfo;
+    private String studentName;
 
     @PostPersist
     public void onPostPersist() {
-        CourseScheduleRegistered courseScheduleRegistered = new CourseScheduleRegistered();
-        BeanUtils.copyProperties(this, courseScheduleRegistered);
-        courseScheduleRegistered.publishAfterCommit();
-    }
-
-    @PreUpdate
-    public void onPreUpdate() {
-        System.out.println(
-                "\n\n##### CourseSchedule onPreUpdate : " + this.getPreOpenYn() + "/" + this.getOpenYn() + "\n\n");
-
-        if (this.getPreOpenYn().booleanValue() != this.getOpenYn().booleanValue()) {
-            Course course = new Course();
-            // mappings goes here
-            course.setOpenYn(this.getOpenYn());
-
-            if (!ScheduleApplication.applicationContext.getBean(CourseService.class).modifyOpenYn(course,
-                    this.getCourseId().toString())) {
-                throw new RollbackException("Failed during Course Open");
-            }
-        }
+        PaymentAppoved paymentAppoved = new PaymentAppoved();
+        BeanUtils.copyProperties(this, paymentAppoved);
+        paymentAppoved.setPayStaus("PaymentAprroved");
+        paymentAppoved.publishAfterCommit();
     }
 
     @PostUpdate
     public void onPostUpdate() {
-        CourseScheduleModified courseScheduleModified = new CourseScheduleModified();
-        BeanUtils.copyProperties(this, courseScheduleModified);
-        courseScheduleModified.publishAfterCommit();
-    }
-
-    @PreRemove
-    public void onPreRemove() {
-        CourseScheduleDeleted courseScheduleDeleted = new CourseScheduleDeleted();
-        BeanUtils.copyProperties(this, courseScheduleDeleted);
-        courseScheduleDeleted.publishAfterCommit();
-    }
-
-    public Boolean getPreOpenYn() {
-        return preOpenYn;
-    }
-
-    public void setPreOpenYn(Boolean preOpenYn) {
-        this.preOpenYn = preOpenYn;
+        PaymentCanceled paymentCanceled = new PaymentCanceled();
+        BeanUtils.copyProperties(this, paymentCanceled);
+        paymentCanceled.publishAfterCommit();
     }
 
     public Long getId() {
@@ -348,62 +308,78 @@ public class CourseSchedule {
         this.id = id;
     }
 
-    public Long getCourseId() {
-        return courseId;
+    public String getApplyId() {
+        return applyId;
     }
 
-    public void setCourseId(Long courseId) {
-        this.courseId = courseId;
+    public void setApplyId(String applyId) {
+        this.applyId = applyId;
     }
 
-    public String getCourseName() {
-        return courseName;
+    public String getPayMethod() {
+        return payMethod;
     }
 
-    public void setCourseName(String courseName) {
-        this.courseName = courseName;
+    public void setPayMethod(String payMethod) {
+        this.payMethod = payMethod;
     }
 
-    public String getTeacher() {
-        return teacher;
+    public String getPayAccount() {
+        return payAccount;
     }
 
-    public void setTeacher(String teacher) {
-        this.teacher = teacher;
+    public void setPayAccount(String payAccount) {
+        this.payAccount = payAccount;
     }
 
-    public Integer getStudentCount() {
-        return studentCount;
+    public String getPayStaus() {
+        return payStaus;
     }
 
-    public void setStudentCount(Integer studentCount) {
-        this.studentCount = studentCount;
+    public void setPayStaus(String payStaus) {
+        this.payStaus = payStaus;
     }
 
-    public Boolean getOpenYn() {
-        return openYn;
+    public String getAddr() {
+        return addr;
     }
 
-    public void setOpenYn(Boolean openYn) {
-        this.openYn = openYn;
+    public void setAddr(String addr) {
+        this.addr = addr;
     }
+
+    public String getTelephoneInfo() {
+        return telephoneInfo;
+    }
+
+    public void setTelephoneInfo(String telephoneInfo) {
+        this.telephoneInfo = telephoneInfo;
+    }
+
+    public String getStudentName() {
+        return studentName;
+    }
+
+    public void setStudentName(String studentName) {
+        this.studentName = studentName;
+    }
+
 }
 
 ```
 - Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 에 대한 별도의 처리가 없도록 데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다
 
 ```
-package lecture;
-
-import java.util.List;
+package team;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-@RepositoryRestResource(collectionResourceRel="courseSchedules", path="courseSchedules")
-public interface CourseScheduleRepository extends PagingAndSortingRepository<CourseSchedule, Long>{
+import java.util.List;
 
-    List<CourseSchedule> findByCourseId(Long courseId);
+public interface PaymentRepository extends PagingAndSortingRepository<Payment, Long> {
+
+    List<Payment> findByApplyId(String applyId);
 }
 ```
 
@@ -567,43 +543,56 @@ mysql>
 
 ## 동기식 호출 과 Fallback 처리
 
-분석단계에서의 조건 중 하나로 강의스케쥴(courseSchedule)->강의(course) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
+분석단계에서의 조건 중 하나로 강의신청(class)->결제(payment) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
 
 - 결제서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
 
 ```
-# (schedule) CourseService.java
+# (class) PaymentService.java
 
-package lecture.external;
+package classnew.external;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.stereotype.Component;
 
-@FeignClient(name = "course", url = "${api.course.url}", fallback = CourseServiceFallback.class)
-public interface CourseService {
-    @RequestMapping(method = RequestMethod.PUT, path = "/modifyOpenYn/{id}")
-    public boolean course(@RequestBody Course course, @PathVariable String id);
-}
+import com.netflix.hystrix.HystrixCommand;
+import com.netflix.hystrix.HystrixCommandGroupKey;
+import com.netflix.hystrix.HystrixCommandKey;
+import com.netflix.hystrix.HystrixCommandProperties;
+
+import feign.Feign;
+import feign.hystrix.HystrixFeign;
+import feign.hystrix.SetterFactory;
+
+@FeignClient(name="payment", url="http://localhost:8083", configuration=PaymentService.PaymentServiceConfiguration.class, fallback=PaymentServiceFallback.class)
+public interface PaymentService {
+    @RequestMapping(method= RequestMethod.POST, path="/payments", consumes = "application/json") //payments로 해야 데이터insert
+    public boolean payApprove(@RequestBody Payment payment);
 ```
 
 - FallBack 처리
 ```
-# (schedule) CourseServiceFallback.java
+# (schedule) PaymentServiceFallback.java
 
-package lecture.external;
+package classnew.external;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class CourseServiceFallback implements CourseService {
+public class PaymentServiceFallback implements PaymentService {
     @Override
-    public boolean course(Course course, String id) {
+    //public Long payApprove(Long classId){
+    public boolean payApprove(Payment payment) {
+
         //do nothing if you want to forgive it
 
-        System.out.println("Circuit breaker has been opened. Fallback returned instead.");
+        System.out.println("\\n=========FALL BACK STARTING=========\\n"); //fallback 메소드 작동 테스트
+       //return 0L;
         return false;
     }
 }
@@ -660,7 +649,7 @@ public class CourseServiceFallback implements CourseService {
     }
 ```
 
-- 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 결제 시스템이 장애가 나면 주문도 못받는다는 것을 확인:
+- 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 결제 시스템이 장애가 나면 도 못받는다는 것을 확인:
 
 ```
 # 강의 (course) 서비스를 잠시 내려놓음
@@ -714,32 +703,44 @@ transfer-encoding: chunked
 
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
 
-강의가 등록된 후 강사 스케쥴관리 시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 강의 스케줄 관리 시스템 문제로 인해 강의 관리가 블로킹 되지 않아도록 처리한다.
+payment(결제) 후 delivery(배송) 서비스로 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 delivery(배송)서비스 시스템 문제로 인해 강의 관리가 블로킹 되지 않아도록 처리한다.
  
-- 이를 위하여 강의 등록/수정 시 자체 DB에 직접 기록을 남긴 후에 곧바로 강의 등록/수정 내용의 도메인 이벤트를 카프카로 송출한다(Publish)
+- 이를 위하여 결제 승인/취소 시 자체 DB에 직접 기록을 남긴 후에 곧바로 결제 승인/취소 내용을 도메인 이벤트를 카프카로 송출한다(Publish)
  
 ```
+package team;
+
+import javax.persistence.*;
+import org.springframework.beans.BeanUtils;
+
 @Entity
-@Table(name = "Course_table")
-public class Course {
+@Table(name = "Payment_table")
+public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-...
+    private String applyId;
+    private String payMethod;
+    private String payAccount;
+    private String payStaus;
+    private String addr;
+    private String telephoneInfo;
+    private String studentName;
 
     @PostPersist
     public void onPostPersist() {
-        CourseRegistered courseRegistered = new CourseRegistered();
-        BeanUtils.copyProperties(this, courseRegistered);
-        courseRegistered.publishAfterCommit();
+        PaymentAppoved paymentAppoved = new PaymentAppoved();
+        BeanUtils.copyProperties(this, paymentAppoved);
+        paymentAppoved.setPayStaus("PaymentAprroved");
+        paymentAppoved.publishAfterCommit();
     }
 
     @PostUpdate
     public void onPostUpdate() {
-        CourseModified courseModified = new CourseModified();
-        BeanUtils.copyProperties(this, courseModified);
-        courseModified.publishAfterCommit();
+        PaymentCanceled paymentCanceled = new PaymentCanceled();
+        BeanUtils.copyProperties(this, paymentCanceled);
+        paymentCanceled.publishAfterCommit();
     }
 ```
 
@@ -747,118 +748,107 @@ public class Course {
 
 ```
     @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverCourseRegistered_RegisterCourseSchedule(@Payload CourseRegistered courseRegistered) {
+    public void wheneverPaymentAppoved_DeliveryStart(@Payload PaymentAppoved paymentAppoved){
 
-        if (!courseRegistered.validate())
-            return;
+        if(!paymentAppoved.validate()) return;
 
-        System.out.println("\n\n##### listener RegisterCourseSchedule : " + courseRegistered.toJson() + "\n\n");
+        System.out.println("\n\n##### listener DeliveryStart : " + paymentAppoved.toJson() + "\n\n");
 
-        CourseSchedule courseSchedule = new CourseSchedule();
-        courseSchedule.setCourseId(courseRegistered.getId());
-        courseSchedule.setCourseName(courseRegistered.getName());
-        courseSchedule.setTeacher(courseRegistered.getTeacher());
-        courseSchedule.setStudentCount(0);
-        courseSchedule.setOpenYn(false);
+        Delivery delivery = new Delivery();
 
-        courseScheduleRepository.save(courseSchedule);
+        delivery.setAddr(paymentAppoved.getAddr());
+        delivery.setApplyId(paymentAppoved.getApplyId());
+        delivery.setName(paymentAppoved.getStudentName());
+        delivery.setTelelephoneInfo(paymentAppoved.getTelephoneInfo());
+        delivery.setDeliveryStatus("DeliveryStart");
+
+        deliveryRepository.save(delivery);
     }
 
     @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverCourseModified_ModifyCourseSchedule(@Payload CourseModified courseModified) {
+    public void wheneverPaymentCanceled_DeliveryCancel(@Payload PaymentCanceled paymentCanceled){
 
-        if (!courseModified.validate())
-            return;
-
-        System.out.println("\n\n##### listener ModifyCourseSchedule : " + courseModified.toJson() + "\n\n");
-
-        List<CourseSchedule> courseScheduleList = courseScheduleRepository.findByCourseId(courseModified.getId());
-
-        for (CourseSchedule courseSchedule : courseScheduleList) {
-            courseSchedule.setCourseName(courseModified.getName());
-            courseSchedule.setTeacher(courseModified.getTeacher());
-
-            courseScheduleRepository.save(courseSchedule);
+        System.out.println("\n\n##### listener DeliveryCancel : " + paymentCanceled.toJson() + "\n\n");
+        
+        if(paymentCanceled.isMe()){
+            List<Delivery> deliveryList = deliveryRepository.findByApplyId(paymentCanceled.getApplyId());
+            
+            if ((deliveryList != null) && !deliveryList.isEmpty()){
+                deliveryRepository.deleteAll(deliveryList);
+            }
         }
     }
 ```
-- 실제 구현을 하자면, 강사는 강의 등록이 되었다는 SMS를 받을 뿐 아니라 수강생이 수강 신청을 한 경우, 이후 강좌 개설 여부 및 수강생 수와 같은 상태 정보를 Mypage Aggregate 내에서 조회 가능
+- 실제 구현을 하자면, 수강생은 수강 신청/신청취소를 한 경우, 수강신청상태,결제상태, 배송상태 정보를 Mypage Aggregate 내에서 조회 가능
   
 ```
     @StreamListener(KafkaProcessor.INPUT)
-    public void whenCourseRegistered_then_CREATE_1(@Payload CourseRegistered courseRegistered) {
+    public void whenClassRegisted_then_CREATE_1 (@Payload ClassRegisted classRegisted) {
         try {
 
-            if (!courseRegistered.validate())
-                return;
+            System.out.println("\n\n##### listener classRegisted : " + classRegisted.toJson() + "\n\n");
+
+            if (!classRegisted.validate()) return;
 
             // view 객체 생성
             Mypage mypage = new Mypage();
             // view 객체에 이벤트의 Value 를 set 함
-            mypage.setCourseId(courseRegistered.getId());
-            mypage.setCourseName(courseRegistered.getName());
-            mypage.setTeacher(courseRegistered.getTeacher());
-            mypage.setFee(courseRegistered.getFee());
-            mypage.setOpenYn(false);
-            mypage.setTextBook(courseRegistered.getTextBook());
+            mypage.setApplyId(String.valueOf(classRegisted.getId()));
+            mypage.setCourseId(String.valueOf(classRegisted.getCourseId()));
+            mypage.setApplyStaus("ApplyFinish");
+            mypage.setPayMethod(classRegisted.getPayMethod());
+            mypage.setPayAccount(classRegisted.getPayAccount());
+            mypage.setStudentName(classRegisted.getStudentName());
+            mypage.setAddr(classRegisted.getAddr());
+            mypage.setTelephoneInfo(classRegisted.getTelephoneInfo());
+            mypage.setPayStatus("PayFinish");
+            //mypage.setDeliveryStatus("D");
             // view 레파지 토리에 save
             mypageRepository.save(mypage);
 
-        } catch (Exception e) {
+        }catch (Exception e){
             e.printStackTrace();
         }
     }
 
+
     @StreamListener(KafkaProcessor.INPUT)
-    public void whenCourseModified_then_UPDATE_1(@Payload CourseModified courseModified) {
+    public void whenPaymentAppoved_then_UPDATE_1(@Payload PaymentAppoved paymentAppoved) {
         try {
-            if (!courseModified.validate())
-                return;
-            // view 객체 조회
-            List<Mypage> mypageList = mypageRepository.findByCourseId(courseModified.getId());
-            for (Mypage mypage : mypageList) {
+            if (!paymentAppoved.validate()) return;
+                // view 객체 조회
+                System.out.println("\n\n##### listener paymentAppoved : " + paymentAppoved.toJson() + "\n\n");
+
+                List<Mypage> mypageList = mypageRepository.findByApplyId(paymentAppoved.getApplyId());
+                for(Mypage mypage : mypageList){
                 // view 객체에 이벤트의 eventDirectValue 를 set 함
-                mypage.setCourseName(courseModified.getName());
-                mypage.setTeacher(courseModified.getTeacher());
-                mypage.setFee(courseModified.getFee());
-                mypage.setTextBook(courseModified.getTextBook());
-                // view 레파지 토리에 save
-                mypageRepository.save(mypage);
-            }
+                    mypage.setPayStatus("PayFinish");
+                    mypage.setApplyStaus("ApplyFinish");
+                    // view 레파지 토리에 save
+                    mypageRepository.save(mypage);
+                }
 
-        } catch (Exception e) {
+        }catch (Exception e){
             e.printStackTrace();
         }
     }
-
     @StreamListener(KafkaProcessor.INPUT)
-    public void whenCourseScheduleModified_then_UPDATE_2(@Payload CourseScheduleModified courseScheduleModified) {
+    public void whenDeliveryStarted_then_UPDATE_2(@Payload DeliveryStarted deliveryStarted) {
         try {
-            if (!courseScheduleModified.validate())
-                return;
-            // view 객체 조회
-            List<Mypage> mypageList = mypageRepository.findByCourseId(courseScheduleModified.getCourseId());
-            for (Mypage mypage : mypageList) {
+            if (!deliveryStarted.validate()) return;
+                // view 객체 조회
+                System.out.println("\n\n##### listener deliveryStarted : " + deliveryStarted.toJson() + "\n\n");
+
+                List<Mypage> mypageList = mypageRepository.findByApplyId(deliveryStarted.getApplyId());
+                for(Mypage mypage : mypageList){
                 // view 객체에 이벤트의 eventDirectValue 를 set 함
-                mypage.setStudentCount(courseScheduleModified.getStudentCount());
-                mypage.setOpenYn(courseScheduleModified.getOpenYn());
+
+                    mypage.setDeliveryStatus("DeliveryFinish");
                 // view 레파지 토리에 save
-                mypageRepository.save(mypage);
-            }
+                    mypageRepository.save(mypage);
+                }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @StreamListener(KafkaProcessor.INPUT)
-    public void whenCourseDeleted_then_DELETE_1(@Payload CourseDeleted courseDeleted) {
-        try {
-            if (!courseDeleted.validate())
-                return;
-            // view 레파지 토리에 삭제 쿼리
-            mypageRepository.deleteByCourseId(courseDeleted.getId());
-        } catch (Exception e) {
+        }catch (Exception e){
             e.printStackTrace();
         }
     }
