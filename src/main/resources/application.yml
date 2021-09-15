@@ -75,8 +75,6 @@ spring:
         event-out:
           destination: classnew
           contentType: application/json
-
 api:
   payment:
-    url: http://payment:8080
-
+    url: http://pay:8080
