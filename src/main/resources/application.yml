@@ -76,8 +76,7 @@ spring:
           destination: classnew
           contentType: application/json
 
-feign:
-  client:
-    url:
-      paymentUrl: http://payment:8080
+api:
+  payment:
+    url: http://payment:8080
 
