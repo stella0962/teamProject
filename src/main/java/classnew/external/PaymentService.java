@@ -22,13 +22,13 @@ import java.util.Date;
 
 //@FeignClient(name="payment", url="http://localhost:8083") //동기식호출- payment가 죽으면 POST가 불가하다.
 //@FeignClient(name="payment", url="http://localhost:8083", configuration=PaymentService.PaymentServiceConfiguration.class, fallback=PaymentServiceFallback.class)
-@FeignClient(name="payment", url="{feign.client.url.paymentUrl}", configuration=PaymentService.PaymentServiceConfiguration.class, fallback=PaymentServiceFallback.class)
+@FeignClient(name="payment", url="{feign.client.url.paymentUrl}") //, configuration=PaymentService.PaymentServiceConfiguration.class, fallback=PaymentServiceFallback.class)
 public interface PaymentService {
     @RequestMapping(method= RequestMethod.POST, path="/payments", consumes = "application/json") //payments로 해야 데이터insert
     public boolean payApprove(@RequestBody Payment payment);
 
 
-    @Component
+   /* @Component
     class PaymentServiceConfiguration {
         Feign.Builder feignBuilder(){
             SetterFactory setterFactory = (target, method) -> HystrixCommand.Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey(target.name()))
@@ -43,7 +43,7 @@ public interface PaymentService {
                     ; // 최소 호출 횟수
             return HystrixFeign.builder().setterFactory(setterFactory);
         }
-    }
+    }*/
 }
 
 /*
