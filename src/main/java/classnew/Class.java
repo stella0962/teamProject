@@ -55,26 +55,30 @@ public class Class {
         payment.setTelephoneInfo(this.getTelephoneInfo());
         payment.setStudentName(this.getStudentName());
     
-        ClassApplication.applicationContext.getBean(classnew.external.PaymentService.class).payApprove(payment);
-
-        this.applyStatus="CLASS_COMPLETED";
-        classRegisted.setClassId(this.getId());
-        classRegisted.setStudentName(this.getStudentName());
-        classRegisted.setAddr(this.getAddr());
-        classRegisted.setTelephoneInfo(this.getTelephoneInfo());
-        classRegisted.setPayMethod(this.getPayMethod());
-        classRegisted.setPayAccount(this.getPayAccount());
-        classRegisted.setApplyStatus(this.getApplyStatus());
-        classRegisted.setId(this.getId());
-        classRegisted.setCourseId(this.getCourseId());
+        if(ClassApplication.applicationContext.getBean(classnew.external.PaymentService.class).payApprove(payment)){
+            this.applyStatus="CLASS_COMPLETED";
+            classRegisted.setClassId(this.getId());
+            classRegisted.setStudentName(this.getStudentName());
+            classRegisted.setAddr(this.getAddr());
+            classRegisted.setTelephoneInfo(this.getTelephoneInfo());
+            classRegisted.setPayMethod(this.getPayMethod());
+            classRegisted.setPayAccount(this.getPayAccount());
+            classRegisted.setApplyStatus(this.getApplyStatus());
+            classRegisted.setId(this.getId());
+            classRegisted.setCourseId(this.getCourseId());
         
-     // this.setApplyStatus("CLASS_APPLIED_SUCCESS");
-     // this.applyStatus="CLASS_APPLIED_SUCCESS";
-        System.out.println("\n\n##### listener classRegisted : " + classRegisted.toJson() + "\n\n");
+            // this.setApplyStatus("CLASS_APPLIED_SUCCESS");
+            // this.applyStatus="CLASS_APPLIED_SUCCESS";
+            System.out.println("\n\n##### listener classRegisted : " + classRegisted.toJson() + "\n\n");
 
-        BeanUtils.copyProperties(this, classRegisted);
-        classRegisted.publishAfterCommit();
+            BeanUtils.copyProperties(this, classRegisted);
+            classRegisted.publishAfterCommit();
 
+        }else {
+            throw new RollbackException("Failed during payment");
+        }
+       
+        
  }
 
     @PostUpdate
