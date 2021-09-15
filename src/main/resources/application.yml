@@ -70,10 +70,10 @@ spring:
       bindings:
         event-in:
           group: class
-          destination: classnew
+          destination: team
           contentType: application/json
         event-out:
-          destination: classnew
+          destination: team
           contentType: application/json
 feign:
   client:
