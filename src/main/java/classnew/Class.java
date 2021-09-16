@@ -22,7 +22,8 @@ public class Class {
     private String payAccount;
     private String applyStatus;
     private Long courseId;
-
+    //
+    
  /*   @PostPersist
     public void onPostPersist(){
         ClassRegisted classRegisted = new ClassRegisted();
