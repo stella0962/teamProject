@@ -55,7 +55,7 @@ public class Class {
         payment.setTelephoneInfo(this.getTelephoneInfo());
         payment.setStudentName(this.getStudentName());
     
-        if(ClassApplication.applicationContext.getBean(classnew.external.PaymentService.class).payApprove(payment)){
+        ClassApplication.applicationContext.getBean(classnew.external.PaymentService.class).payApprove(payment)
             this.applyStatus="CLASS_COMPLETED";
             classRegisted.setClassId(this.getId());
             classRegisted.setStudentName(this.getStudentName());
@@ -73,11 +73,6 @@ public class Class {
 
             BeanUtils.copyProperties(this, classRegisted);
             classRegisted.publishAfterCommit();
-
-        }else {
-            throw new RollbackException("Failed during payment");
-        }
-       
         
  }
 
