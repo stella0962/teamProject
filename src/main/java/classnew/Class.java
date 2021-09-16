@@ -44,7 +44,7 @@ public class Class {
      // Following code causes dependency to external APIs
      //it is NOT A GOOD PRACTICE. instead, Event-Policy mapping is recommended.
 
-        /* ClassRegisted classRegisted = new ClassRegisted();
+         ClassRegisted classRegisted = new ClassRegisted();
 
         classnew.external.Payment payment = new classnew.external.Payment();
         payment.setApplyId(String.valueOf(this.getId()));
@@ -77,7 +77,7 @@ public class Class {
         }else {
             throw new RollbackException("Failed during payment");
         }
-       */
+       
         
  }
 
