@@ -22,7 +22,7 @@ import java.util.Date;
 
 //@FeignClient(name="payment", url="http://localhost:8083") //동기식호출- payment가 죽으면 POST가 불가하다.
 //@FeignClient(name="payment", url="http://localhost:8083", configuration=PaymentService.PaymentServiceConfiguration.class, fallback=PaymentServiceFallback.class)
-@FeignClient(name="payment", url="http://payment:8080", configuration=PaymentService.PaymentServiceConfiguration.class, fallback=PaymentServiceFallback.class)
+@FeignClient(name="payment", url="http://ab6c51987a9bf4492826b76503de84b2-1875639511.ca-central-1.elb.amazonaws.com:8080/payments", configuration=PaymentService.PaymentServiceConfiguration.class, fallback=PaymentServiceFallback.class)
 public interface PaymentService {
 //    @RequestMapping(method= RequestMethod.POST, path="/payments", consumes = "application/json") //payments로 해야 데이터insert
         @RequestMapping(method= RequestMethod.POST, path="/payments") //payments로 해야 데이터insert
