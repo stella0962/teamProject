@@ -35,7 +35,7 @@ spring:
 feign:
   client:
     url:
-      paymentUrl: http://ab6c51987a9bf4492826b76503de84b2-1875639511.ca-central-1.elb.amazonaws.com:8080
+      paymentUrl: http://localhost:8083
   hystrix:
     enabled: true
 
@@ -70,12 +70,14 @@ spring:
       bindings:
         event-in:
           group: class
-          destination: team
+          destination: classnew
           contentType: application/json
         event-out:
-          destination: team
+          destination: classnew
           contentType: application/json
+
 feign:
   client:
     url:
-      paymentUrl: http://ab6c51987a9bf4492826b76503de84b2-1875639511.ca-central-1.elb.amazonaws.com:8080
+      paymentUrl: http://payment:8080
+
