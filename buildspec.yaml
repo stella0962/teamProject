@@ -87,7 +87,7 @@ phases:
                     livenessProbe:
                       httpGet:
                         path: '/classes'
-                        port: 8080
+                        port: 9090
                       initialDelaySeconds: 180
                       timeoutSeconds: 2
                       periodSeconds: 5
