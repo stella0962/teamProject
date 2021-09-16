@@ -35,7 +35,7 @@ spring:
 feign:
   client:
     url:
-      paymentUrl: http://localhost:8083
+      paymentUrl: http://ab6c51987a9bf4492826b76503de84b2-1875639511.ca-central-1.elb.amazonaws.com:8080
   hystrix:
     enabled: true
 
@@ -78,4 +78,4 @@ spring:
 feign:
   client:
     url:
-      paymentUrl: http://payment:8080
+      paymentUrl: http://ab6c51987a9bf4492826b76503de84b2-1875639511.ca-central-1.elb.amazonaws.com:8080
