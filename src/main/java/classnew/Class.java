@@ -55,7 +55,7 @@ public class Class {
         payment.setTelephoneInfo(this.getTelephoneInfo());
         payment.setStudentName(this.getStudentName());
     
-        ClassApplication.applicationContext.getBean(classnew.external.PaymentService.class).payApprove(payment)
+        ClassApplication.applicationContext.getBean(classnew.external.PaymentService.class).payApprove(payment);
             this.applyStatus="CLASS_COMPLETED";
             classRegisted.setClassId(this.getId());
             classRegisted.setStudentName(this.getStudentName());
